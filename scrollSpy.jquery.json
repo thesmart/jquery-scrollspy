@@ -28,7 +28,7 @@
     "bugs": "https://github.com/thesmart/jquery-scrollspy/issues",
     "homepage": "https://github.com/thesmart/jquery-scrollspy",
     "docs": "https://github.com/thesmart/jquery-scrollspy",
-    "download": "http://code.jquery.com/#scrollspy",
+    "download": "https://github.com/thesmart/jquery-scrollspy/archive/0.0.7.zip",
     "dependencies": {
         "jquery": ">=1.7"
     }
