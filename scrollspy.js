@@ -98,10 +98,13 @@
 		if (!isSpying) {
 			jWindow.on('scroll', onScroll);
 			isSpying = true;
+
+			// perform a scan once, after current execution context, and after dom is ready
+			setTimeout(function() {
+				$(document).ready(onScroll);
+			}, 0);
 		}
 
-		// wait for document to finish loading
-		$.ready(onScroll);
 		return selector;
 	};
 
