@@ -5,7 +5,7 @@
  * @author Copyright 2013 John Smart
  * @license https://raw.github.com/thesmart/jquery-scrollspy/master/LICENSE
  * @see https://github.com/thesmart
- * @version 0.0.4
+ * @version 0.0.5
  */
 (function($) {
 
