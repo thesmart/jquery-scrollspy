@@ -82,6 +82,7 @@
 	/**
 	 * Enables ScrollSpy using a selector
 	 * @param {jQuery|string} selector		The elements collection, or a selector
+	 * @returns {jQuery}
 	 */
 	$.scrollSpy = function(selector) {
 		selector = $(selector);
@@ -102,7 +103,7 @@
 	/**
 	 * Enables ScrollSpy on a collection of elements
 	 * e.g. $('.scrollSpy').scrollSpy()
-	 * @returns {*}
+	 * @returns {jQuery}
 	 */
 	$.fn.scrollSpy = function() {
 		return $.scrollSpy($(this));
