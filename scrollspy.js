@@ -1,7 +1,6 @@
 /**
  * Extend jquery with a scrollspy plugin.
- * This watches the window scroll (or element of your choice w/ scrollTop) and fires events when elements are
- * scrolled into viewport for 200ms or longer.
+ * This watches the window scroll and fires events when elements are scrolled into viewport.
  */
 (function($) {
 
