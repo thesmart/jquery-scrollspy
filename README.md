@@ -17,6 +17,11 @@ $('.tile').scrollSpy();
 
 // or you could do this:
 // $.scrollSpy($('.tile'));
+// or this
+// $('.tile').each(function(i, element) {
+// 		$.scrollSpy(element);
+// });
+
 ```
 ## TODO
 
