@@ -2,6 +2,13 @@
 
 A jQuery plugin for detecting enter/exit of elements in the viewport when the user scrolls
 
+## New Features
+
+Added a couple new features:
+
+ * now supports window resize
+ * now throttles scrollspy events so that event handles only fire every 100 milliseconds
+
 ## Usage
 
 ```
@@ -23,8 +30,3 @@ $('.tile').scrollSpy();
 // });
 
 ```
-## TODO
-
-1. *Testing in Internet Explorer.  Please let me know if it works!*
-1. This plugin has BigO(n) performance, and is "ok" for a few hundred elements.  If you need to track more elements, you may want to contribute a smarter geospacial index for considering intersection.
-1. A feature for considering only elements that stay within the viewport for longer than n-milliseconds.

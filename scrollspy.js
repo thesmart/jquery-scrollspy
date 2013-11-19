@@ -2,6 +2,9 @@
  * Extend jquery with a scrollspy plugin.
  * This watches the window scroll and fires events when elements are scrolled into viewport.
  *
+ * throttle() and getTime() taken from Underscore.js
+ * https://github.com/jashkenas/underscore
+ *
  * @author Copyright 2013 John Smart
  * @license https://raw.github.com/thesmart/jquery-scrollspy/master/LICENSE
  * @see https://github.com/thesmart
@@ -85,18 +88,75 @@
 	}
 
 	/**
+	 * Get time in ms
+   * @license https://raw.github.com/jashkenas/underscore/master/LICENSE
+	 * @type {function}
+	 * @return {number}
+	 */
+	var getTime = (Date.now || function () {
+		return new Date().getTime();
+	});
+
+	/**
+	 * Returns a function, that, when invoked, will only be triggered at most once
+	 * during a given window of time. Normally, the throttled function will run
+	 * as much as it can, without ever going more than once per `wait` duration;
+	 * but if you'd like to disable the execution on the leading edge, pass
+	 * `{leading: false}`. To disable execution on the trailing edge, ditto.
+   * @license https://raw.github.com/jashkenas/underscore/master/LICENSE
+	 * @param {function} func
+	 * @param {number} wait
+	 * @param {Object=} options
+	 * @returns {Function}
+	 */
+	function throttle(func, wait, options) {
+		var context, args, result;
+		var timeout = null;
+		var previous = 0;
+		options || (options = {});
+		var later = function () {
+			previous = options.leading === false ? 0 : getTime();
+			timeout = null;
+			result = func.apply(context, args);
+			context = args = null;
+		};
+		return function () {
+			var now = getTime();
+			if (!previous && options.leading === false) previous = now;
+			var remaining = wait - (now - previous);
+			context = this;
+			args = arguments;
+			if (remaining <= 0) {
+				clearTimeout(timeout);
+				timeout = null;
+				previous = now;
+				result = func.apply(context, args);
+				context = args = null;
+			} else if (!timeout && options.trailing !== false) {
+				timeout = setTimeout(later, remaining);
+			}
+			return result;
+		};
+	};
+
+	/**
 	 * Enables ScrollSpy using a selector
 	 * @param {jQuery|string} selector		The elements collection, or a selector
+	 * @param {Object=} options						Optional. Set { throttle: number } to change scrollspy throttling. Default: 100 ms
 	 * @returns {jQuery}
 	 */
-	$.scrollSpy = function(selector) {
+	$.scrollSpy = function(selector, options) {
 		selector = $(selector);
 		selector.each(function(i, element) {
 			elements.push($(element));
 		});
+		options = options || {
+			throttle: 100
+		}
 
 		if (!isSpying) {
-			jWindow.on('scroll', onScroll);
+			jWindow.on('scroll', throttle(onScroll, options.throttle || 100));
+			jWindow.on('resize', throttle(onScroll, options.throttle || 100));
 			isSpying = true;
 
 			// perform a scan once, after current execution context, and after dom is ready
@@ -111,10 +171,11 @@
 	/**
 	 * Enables ScrollSpy on a collection of elements
 	 * e.g. $('.scrollSpy').scrollSpy()
+	 * @param {Object=} options						Optional. Set { throttle: number } to change scrollspy throttling
 	 * @returns {jQuery}
 	 */
-	$.fn.scrollSpy = function() {
-		return $.scrollSpy($(this));
+	$.fn.scrollSpy = function(options) {
+		return $.scrollSpy($(this), options);
 	};
 
 })(jQuery);
