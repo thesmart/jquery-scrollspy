@@ -11,7 +11,7 @@ Added a couple new features:
 
 ## Usage
 
-```
+```js
 $('.tile').on('scrollSpy:enter', function() {
 	console.log('enter:', $(this).attr('id'));
 });
