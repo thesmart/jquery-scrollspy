@@ -88,6 +88,13 @@
 	}
 
 	/**
+	 * Called when window is resized
+	*/
+	function onWinSize() {
+		jWindow.trigger('scrollSpy:winSize');
+	}
+
+	/**
 	 * Get time in ms
    * @license https://raw.github.com/jashkenas/underscore/master/LICENSE
 	 * @type {function}
@@ -103,7 +110,7 @@
 	 * as much as it can, without ever going more than once per `wait` duration;
 	 * but if you'd like to disable the execution on the leading edge, pass
 	 * `{leading: false}`. To disable execution on the trailing edge, ditto.
-   * @license https://raw.github.com/jashkenas/underscore/master/LICENSE
+	 * @license https://raw.github.com/jashkenas/underscore/master/LICENSE
 	 * @param {function} func
 	 * @param {number} wait
 	 * @param {Object=} options
@@ -152,7 +159,7 @@
 		});
 		options = options || {
 			throttle: 100
-		}
+		};
 
 		if (!isSpying) {
 			jWindow.on('scroll', throttle(onScroll, options.throttle || 100));
@@ -166,6 +173,19 @@
 		}
 
 		return selector;
+	};
+
+	/**
+	 * Listen for window resize events
+	 * @param {Object=} options						Optional. Set { throttle: number } to change throttling. Default: 100 ms
+	 * @returns {jQuery}		$(window)
+	 */
+	$.winSizeSpy = function(options) {
+		$.winSizeSpy = function() { return jWindow; }; // lock from multiple calls
+		options = options || {
+			throttle: 100
+		};
+		return jWindow.on('resize', throttle(onWinSize, options.throttle || 100));
 	};
 
 	/**

@@ -30,3 +30,9 @@ $('.tile').scrollSpy();
 // });
 
 ```
+
+*NEW* - Added ```scrollSpy:winSize``` event for watching window resize.  This fires any time the window is resized by the user, and properly throttles the event.
+
+```
+$.winSizeSpy().on('scrollSpy:winSize', funcy)
+```
