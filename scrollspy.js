@@ -17,6 +17,12 @@
 	var elementsInView = [];
 	var isSpying = false;
 	var ticks = 0;
+	var offset = {
+		top : 0,
+		right : 0,
+		bottom : 0,
+		left : 0,
+	}
 
 	/**
 	 * Find elements that are within the boundary
@@ -61,7 +67,7 @@
 			bottom = top + jWindow.height();
 
 		// determine which elements are in view
-		var intersections = findElements(top, right, bottom, left);
+		var intersections = findElements(top+offset.top, right+offset.right, bottom+offset.bottom, left+offset.left);
 		$.each(intersections, function(i, element) {
 			var lastTick = element.data('scrollSpy:ticks');
 			if (typeof lastTick != 'number') {
@@ -148,8 +154,13 @@
 
 	/**
 	 * Enables ScrollSpy using a selector
-	 * @param {jQuery|string} selector		The elements collection, or a selector
-	 * @param {Object=} options						Optional. Set { throttle: number } to change scrollspy throttling. Default: 100 ms
+	 * @param {jQuery|string} selector  The elements collection, or a selector
+	 * @param {Object=} options	Optional.
+											throttle : number -> scrollspy throttling. Default: 100 ms
+											offsetTop : number -> offset from top. Default: 0
+											offsetRight : number -> offset from right. Default: 0
+											offsetBottom : number -> offset from bottom. Default: 0
+											offsetLeft : number -> offset from left. Default: 0
 	 * @returns {jQuery}
 	 */
 	$.scrollSpy = function(selector, options) {
@@ -160,6 +171,11 @@
 		options = options || {
 			throttle: 100
 		};
+
+		offset.top = options.offsetTop || 0;
+		offset.right = options.offsetRight || 0;
+		offset.bottom = options.offsetBottom || 0;
+		offset.left = options.offsetLeft || 0;
 
 		if (!isSpying) {
 			jWindow.on('scroll', throttle(onScroll, options.throttle || 100));
@@ -191,7 +207,12 @@
 	/**
 	 * Enables ScrollSpy on a collection of elements
 	 * e.g. $('.scrollSpy').scrollSpy()
-	 * @param {Object=} options						Optional. Set { throttle: number } to change scrollspy throttling
+	 * @param {Object=} options	Optional.
+											throttle : number -> scrollspy throttling. Default: 100 ms
+											offsetTop : number -> offset from top. Default: 0
+											offsetRight : number -> offset from right. Default: 0
+											offsetBottom : number -> offset from bottom. Default: 0
+											offsetLeft : number -> offset from left. Default: 0
 	 * @returns {jQuery}
 	 */
 	$.fn.scrollSpy = function(options) {
