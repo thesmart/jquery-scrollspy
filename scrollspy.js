@@ -177,16 +177,19 @@
 		offset.bottom = options.offsetBottom || 0;
 		offset.left = options.offsetLeft || 0;
 
-		if (!isSpying) {
-			jWindow.on('scroll', throttle(onScroll, options.throttle || 100));
-			jWindow.on('resize', throttle(onScroll, options.throttle || 100));
-			isSpying = true;
+		var throttledScroll = throttle(onScroll, options.throttle || 100);
+		var readyScroll = function(){
+			$(document).ready(throttledScroll);
+		};
 
-			// perform a scan once, after current execution context, and after dom is ready
-			setTimeout(function() {
-				$(document).ready(onScroll);
-			}, 0);
+		if (!isSpying) {
+			jWindow.on('scroll', readyScroll);
+			jWindow.on('resize', readyScroll);
+			isSpying = true;
 		}
+
+		// perform a scan once, after current execution context, and after dom is ready
+		setTimeout(readyScroll, 0);
 
 		return selector;
 	};

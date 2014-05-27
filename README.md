@@ -1,13 +1,14 @@
 # jquery-scrollspy
 
-A jQuery plugin for detecting enter/exit of elements in the viewport when the user scrolls
+A jQuery plugin for detecting enter/exit of elements in the viewport when the user scrolls.
 
 ## New Features
 
 Added a couple new features:
 
- * now supports window resize
- * now throttles scrollspy events so that event handles only fire every 100 milliseconds
+ * May 2014 - optional window offset, allows for things like floating navs
+ * Feb 2014 - supports window resize
+ * Nov 2013 - throttles scrollspy events so that event handles only fire every 100 milliseconds
 
 ## Usage
 
@@ -31,8 +32,19 @@ $('.tile').scrollSpy();
 
 ```
 
-*NEW* - Added ```scrollSpy:winSize``` event for watching window resize.  This fires any time the window is resized by the user, and properly throttles the event.
+# Window Resize
+
+Use the ```scrollSpy:winSize``` event for watching window resize.  This fires any time the window is resized by the user.
 
 ```
 $.winSizeSpy().on('scrollSpy:winSize', funcy)
 ```
+
+# Contributions
+
+Please provide pull requests for additional features.  Test cases would be most weclome!
+
+Thank you contributors:
+
+ * [@Mithgol](https://github.com/Mithgol)
+ * [@eithanshavit](https://github.com/eithanshavit)
