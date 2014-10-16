@@ -1,0 +1,27 @@
+body{
+  font-family: "Helvetica";
+  padding: 50px 20px 0;
+  background: #f4f4f7;
+  color: #444;
+  margin: 0;
+
+  .jumbotron {
+    h1, h3 {
+      text-align: center;
+    }
+  }
+}
+
+.demo {
+  .box {
+    margin: 30px 0;
+    background-color: white;
+    line-height: 500px;
+    font-size: 30px;
+    text-align: center;
+  }
+
+  #box-1 {
+    margin-top: 0;
+  }
+}
