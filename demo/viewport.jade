@@ -1,0 +1,45 @@
+#viewport-demo.container
+  .jumbotron
+    h1.text-center Viewport Demo
+    .lead
+      p Scroll the window around to see the squares turn yellow upon entering the viewport.
+      p The enter and exit events are throttled in order to exaggerate what is happening.
+      pre
+        code.
+          $(window).ready(->
+            $('.box').on('scrollSpy:enter', ->
+              $(this).addClass('entered')
+              $(this).removeClass('exited')
+            )
+            $('.box').on('scrollSpy:exit', ->
+              $(this).removeClass('entered')
+              $(this).addClass('exited')
+            )
+            $.scrollSpy('.box', throttle: 3000)
+          )
+  .row
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+    .box
+      | box
+script(type='text/javascript' src='./js/viewport.js')

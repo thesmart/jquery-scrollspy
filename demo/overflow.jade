@@ -1,0 +1,222 @@
+#overflow-demo.container
+  .jumbotron
+    h1.text-center Overflow Demo
+    .lead
+      p Scroll the divs around to see the squares turn yellow upon entering the viewable region.
+      p Notice that resizing the browser window is also supported.
+      p All spied children in a scrollable div will "exit" when the scrollable div exits the viewport.
+      p The enter and exit events are throttled in order to exaggerate what is happening.
+      pre
+        code.
+          $(window).ready(->
+            $('.box').on('scrollSpy:enter', ->
+              $(this).addClass('entered')
+              $(this).removeClass('exited')
+            )
+            $('.box').on('scrollSpy:exit', ->
+              $(this).removeClass('entered')
+              $(this).addClass('exited')
+            )
+            $('#overflow-1').scrollSpy('.box', throttle: 3000)
+            $('#overflow-2').scrollSpy('.box', throttle: 3000)
+          )
+  .row
+    .col-sm-6
+      #overflow-1
+        .area
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+    .col-sm-6
+      #overflow-2
+        .area
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+          .box
+            | box
+script(type='text/javascript' src='./js/overflow.js')
