@@ -19,16 +19,10 @@
   # bound to the window one which the script is linked
   $window = $(window)
 
-  # a registration list of handlers to fire on throttled window events
-  allHandlers = []
-
-  # a throttle for the scroll event that fires too fast.
-  throttledScroll = null
-
   # unique id generator
   _uid = 0
   newUid = ->
-    id = "_scrollSpy-uid-#{_uid}"
+    id = "uid-#{_uid}"
     _uid += 1
     return id
 
@@ -38,10 +32,6 @@
   getTime = (Date.now or ->
     new Date().getTime()
   )
-
-  # Called after a throttled scroll or resize event
-  onThrottledScroll = ->
-    (handler.call() for handler in allHandlers)
 
   # Used to slow the ridiculously fast scroll and resize events.
   #
@@ -80,6 +70,27 @@
       else
       timeout = setTimeout(later, remaining) if not timeout and options.trailing isnt false
       result
+
+  # provides a unique throttled event handler
+  onSlow = (jQuery, event, fn, wait) ->
+    debugger
+    # keep a list of all handlers
+    handlers = jQuery.data("scrollSpy:onSlow:#{event}")
+    if handlers
+      handlers.push(fn)
+      return this
+
+    handlers = [fn]
+    jQuery.data("scrollSpy:onSlow:#{event}", handlers)
+
+    throttleFn = throttle(->
+      $.each(handlers, (i, handler)->
+        handler.call()
+        true
+      )
+    , wait)
+    jQuery.on(event, throttleFn)
+    return
 
   # Calculate rectangle coordinates of the viewport
   viewPortCoordinates = ->
@@ -182,16 +193,13 @@
     $parent.data('scrollSpy:init', true)
 
     # bind the scroll handler
-    allHandlers.push(bindSpy($parent, selector))
+    spyFn = bindSpy($parent, selector)
 
-    # throttle scroll events, which fire like crazy fast
-    throttledScroll = throttle(onThrottledScroll, options.throttle) unless throttledScroll
-
-    # start polling for scroll events after method returns
     setTimeout(->
-      $parent.on('scroll', throttledScroll)
-      $window.on('resize', throttledScroll)
-      throttledScroll()
+      # throttle scroll & resize events, which fire like crazy fast
+      onSlow($parent, 'scroll', spyFn, options.throttle)
+      onSlow($window, 'resize', spyFn, options.throttle)
+      spyFn()
       return
     , 1)
     parent
