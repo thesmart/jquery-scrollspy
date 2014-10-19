@@ -73,7 +73,6 @@
 
   # provides a unique throttled event handler
   onSlow = (jQuery, event, fn, wait) ->
-    debugger
     # keep a list of all handlers
     handlers = jQuery.data("scrollSpy:onSlow:#{event}")
     if handlers
@@ -214,7 +213,7 @@
     )
     this
 
-  # Listen for window resize events
+  # Listen for window throttled resize events
   # e.g. $.resizeSpy().on('resizeSpy:resize', fn)
   # NOTE: only call after DOM is loaded
   $.resizeSpy = (options) ->
@@ -224,11 +223,10 @@
 
     options.throttle ||= THROTTLE_MS
 
-    $window.on('resize', throttle((->
-      $trigger('resizeSpy:resize');
-      $trigger('scrollSpy:resize');
-      ), options.throttle)
-    )
+    onSlow($window, 'resize', ->
+      $window.triggerHandler('resizeSpy:resize');
+      $window.triggerHandler('scrollSpy:resize');
+    , options.throttle)
     $window
 
   return
