@@ -133,16 +133,16 @@
     return a.left < b.right and a.right > b.left and a.top < b.bottom and a.bottom > b.top
 
   # Binds the spying logic to a contect necessary for element intersection calculations
-  bindSpy = ($parent, selector) ->
-    # unique id for this container - makes a channel for the specific parent element
-    uid = newUid()
-
+  bindSpy = (uid, $parent, selector) ->
     return ->
       if $parent == $window
-        $children = $('body').find(selector)
+        $children = $(selector)
         pCoords = viewPortCoordinates()
       else
-        $children = $parent.find(selector)
+        if typeof selector is 'string'
+          $children = $parent.find(selector)
+        else if selector
+          $children = $(selector)
         pCoords = parentCoordinates($parent)
 
       $children.each((i, child) ->
@@ -170,8 +170,6 @@
   #             * throttle {number} internal. scroll event throttling. throttling. Default: 100 ms
   #             * parent {Element|jQuery} a parent scrollable element to track. Default: undefined|null
   $.scrollSpy = (selector, options = {}) ->
-    throw new Error('jQuery.scrollSpy - selector must be a string') unless typeof selector == 'string'
-
     # defaults
     options.throttle ||= THROTTLE_MS
 
@@ -186,13 +184,18 @@
     else
       $parent = $window
 
-    # only spy once per scrolling element
-    isInit = $parent.data('scrollSpy:init')
-    return $(selector) if isInit
-    $parent.data('scrollSpy:init', true)
+    # we'll return the selector to match jQuery conventions
+    if typeof selector == 'string'
+      $selector = $parent.find(selector)
+    else
+      $selector = $(selector)
+      selector = $selector
+
+    # unique id for this container - makes a channel for the specific parent element
+    uid = newUid()
 
     # bind the scroll handler
-    spyFn = bindSpy($parent, selector)
+    spyFn = bindSpy(uid, $parent, selector)
 
     setTimeout(->
       # throttle scroll & resize events, which fire like crazy fast
@@ -201,7 +204,7 @@
       spyFn()
       return
     , 1)
-    parent
+    $selector
 
   # Enables ScrollSpy on elements in a jQuery collection
   # e.g. $('.scrollSpy').scrollSpy()
