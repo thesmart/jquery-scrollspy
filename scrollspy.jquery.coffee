@@ -19,8 +19,11 @@
   # bound to the window one which the script is linked
   $window = $(window)
 
-  # a registration list of handlers to fire on window resize
+  # a registration list of handlers to fire on throttled window events
   allHandlers = []
+
+  # a throttle for the scroll event that fires too fast.
+  throttledScroll = null
 
   # unique id generator
   _uid = 0
@@ -35,6 +38,10 @@
   getTime = (Date.now or ->
     new Date().getTime()
   )
+
+  # Called after a throttled scroll or resize event
+  onThrottledScroll = ->
+    (handler.call() for handler in allHandlers)
 
   # Used to slow the ridiculously fast scroll and resize events.
   #
@@ -117,10 +124,9 @@
 
   # Binds the spying logic to a contect necessary for element intersection calculations
   bindSpy = ($parent, selector) ->
-    # unique id for this container
+    # unique id for this container - makes a channel for the specific parent element
     uid = newUid()
 
-    # determines intersections
     return ->
       if $parent == $window
         $children = $('body').find(selector)
@@ -136,7 +142,6 @@
         isIntersected = checkIntersect(pCoords, cCoords)
         $child.data("scrollSpy:#{uid}", isIntersected)
 
-        console.info($child.prop('id'), hasEntered, isIntersected)
         if isIntersected and not hasEntered
           # entered
           $child.triggerHandler('scrollSpy:enter')
@@ -152,7 +157,7 @@
   #
   # @param {string} selector    A selector statement.
   # @param {Object=} options    Optional.
-  #             * throttle {number} scroll event throttling. throttling. Default: 100 ms
+  #             * throttle {number} internal. scroll event throttling. throttling. Default: 100 ms
   #             * parent {Element|jQuery} a parent scrollable element to track. Default: undefined|null
   $.scrollSpy = (selector, options = {}) ->
     throw new Error('jQuery.scrollSpy - selector must be a string') unless typeof selector == 'string'
@@ -176,8 +181,11 @@
     return $(selector) if isInit
     $parent.data('scrollSpy:init', true)
 
+    # bind the scroll handler
+    allHandlers.push(bindSpy($parent, selector))
+
     # throttle scroll events, which fire like crazy fast
-    throttledScroll = throttle(bindSpy($parent, selector), options.throttle)
+    throttledScroll = throttle(onThrottledScroll, options.throttle) unless throttledScroll
 
     # start polling for scroll events after method returns
     setTimeout(->
