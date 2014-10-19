@@ -7,5 +7,5 @@ $(window).ready(->
     $(this).removeClass('entered')
     $(this).addClass('exited')
   )
-  $.scrollSpy('.box', throttle: 3000)
+  $.scrollSpy('.box', throttle: 1000)
 )

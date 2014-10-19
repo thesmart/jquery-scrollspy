@@ -7,6 +7,6 @@ $(window).ready(->
     $(this).removeClass('entered')
     $(this).addClass('exited')
   )
-  $('#overflow-1').scrollSpy('.box', throttle: 3000)
-  $('#overflow-2').scrollSpy('.box', throttle: 3000)
+  $('#overflow-1').scrollSpy('.box', throttle: 800)
+  $('#overflow-2').scrollSpy('.box', throttle: 800)
 )

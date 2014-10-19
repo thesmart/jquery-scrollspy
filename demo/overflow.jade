@@ -1,5 +1,6 @@
 #overflow-demo.container
   .jumbotron
+    h1.text-center jQuery ScrollSpy
     h1.text-center Overflow Demo
     .lead
       p Scroll the divs around to see the squares turn yellow upon entering the viewable region.
@@ -9,17 +10,17 @@
       pre
         code.
           $(window).ready(->
-            $('.box').on('scrollSpy:enter', ->
-              $(this).addClass('entered')
-              $(this).removeClass('exited')
-            )
-            $('.box').on('scrollSpy:exit', ->
-              $(this).removeClass('entered')
-              $(this).addClass('exited')
-            )
-            $('#overflow-1').scrollSpy('.box', throttle: 3000)
-            $('#overflow-2').scrollSpy('.box', throttle: 3000)
-          )
+             $('.box').on('scrollSpy:enter', ->
+               $(this).addClass('entered')
+               $(this).removeClass('exited')
+             )
+             $('.box').on('scrollSpy:exit', ->
+               $(this).removeClass('entered')
+               $(this).addClass('exited')
+             )
+             $('#overflow-1').scrollSpy('.box', throttle: 800)
+             $('#overflow-2').scrollSpy('.box', throttle: 800)
+           )
   .row
     .col-sm-6
       #overflow-1

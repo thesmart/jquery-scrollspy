@@ -1,6 +1,7 @@
-/**
+
+/**!
  * Extend jquery with a scrollspy plugin.
- * This watches the window scroll and fires events when elements are scrolled into viewport.
+ * This watches elements and fires events when they are scrolled partially into viewport.
  *
  * throttle() and getTime() taken from Underscore.js
  * https://github.com/jashkenas/underscore
@@ -8,218 +9,270 @@
  * @author Copyright 2013 John Smart
  * @license https://raw.github.com/thesmart/jquery-scrollspy/master/LICENSE
  * @see https://github.com/thesmart
- * @version 0.1.2
+ * @version 0.2.0
  */
 (function($) {
+  var $window, THROTTLE_MS, bindSpy, checkIntersect, childCoordinates, getTime, newUid, onSlow, parentCoordinates, throttle, viewPortCoordinates, _uid;
+  THROTTLE_MS = 200;
+  $window = $(window);
+  _uid = 0;
 
-	var jWindow = $(window);
-	var elements = [];
-	var elementsInView = [];
-	var isSpying = false;
-	var ticks = 0;
-	var offset = {
-		top : 0,
-		right : 0,
-		bottom : 0,
-		left : 0,
-	}
+  /*
+   * unique id generator
+   */
+  newUid = function() {
+    var id;
+    id = "uid-" + _uid;
+    _uid += 1;
+    return id;
+  };
 
-	/**
-	 * Find elements that are within the boundary
-	 * @param {number} top
-	 * @param {number} right
-	 * @param {number} bottom
-	 * @param {number} left
-	 * @return {jQuery}		A collection of elements
-	 */
-	function findElements(top, right, bottom, left) {
-		var hits = $();
-		$.each(elements, function(i, element) {
-			var elTop = element.offset().top,
-				elLeft = element.offset().left,
-				elRight = elLeft + element.width(),
-				elBottom = elTop + element.height();
-
-			var isIntersect = !(elLeft > right ||
-				elRight < left ||
-				elTop > bottom ||
-				elBottom < top);
-
-			if (isIntersect) {
-				hits.push(element);
-			}
-		});
-
-		return hits;
-	}
-
-	/**
-	 * Called when the user scrolls the window
-	 */
-	function onScroll() {
-		// unique tick id
-		++ticks;
-
-		// viewport rectangle
-		var top = jWindow.scrollTop(),
-			left = jWindow.scrollLeft(),
-			right = left + jWindow.width(),
-			bottom = top + jWindow.height();
-
-		// determine which elements are in view
-		var intersections = findElements(top+offset.top, right+offset.right, bottom+offset.bottom, left+offset.left);
-		$.each(intersections, function(i, element) {
-			var lastTick = element.data('scrollSpy:ticks');
-			if (typeof lastTick != 'number') {
-				// entered into view
-				element.triggerHandler('scrollSpy:enter');
-			}
-
-			// update tick id
-			element.data('scrollSpy:ticks', ticks);
-		});
-
-		// determine which elements are no longer in view
-		$.each(elementsInView, function(i, element) {
-			var lastTick = element.data('scrollSpy:ticks');
-			if (typeof lastTick == 'number' && lastTick !== ticks) {
-				// exited from view
-				element.triggerHandler('scrollSpy:exit');
-				element.data('scrollSpy:ticks', null);
-			}
-		});
-
-		// remember elements in view for next tick
-		elementsInView = intersections;
-	}
-
-	/**
-	 * Called when window is resized
-	*/
-	function onWinSize() {
-		jWindow.trigger('scrollSpy:winSize');
-	}
-
-	/**
-	 * Get time in ms
+  /*
+   * Get ms since epoch
    * @license https://raw.github.com/jashkenas/underscore/master/LICENSE
-	 * @type {function}
-	 * @return {number}
-	 */
-	var getTime = (Date.now || function () {
-		return new Date().getTime();
-	});
+   * @returns {number}
+   */
+  getTime = Date.now || function() {
+    return new Date().getTime();
+  };
 
-	/**
-	 * Returns a function, that, when invoked, will only be triggered at most once
-	 * during a given window of time. Normally, the throttled function will run
-	 * as much as it can, without ever going more than once per `wait` duration;
-	 * but if you'd like to disable the execution on the leading edge, pass
-	 * `{leading: false}`. To disable execution on the trailing edge, ditto.
-	 * @license https://raw.github.com/jashkenas/underscore/master/LICENSE
-	 * @param {function} func
-	 * @param {number} wait
-	 * @param {Object=} options
-	 * @returns {Function}
-	 */
-	function throttle(func, wait, options) {
-		var context, args, result;
-		var timeout = null;
-		var previous = 0;
-		options || (options = {});
-		var later = function () {
-			previous = options.leading === false ? 0 : getTime();
-			timeout = null;
-			result = func.apply(context, args);
-			context = args = null;
-		};
-		return function () {
-			var now = getTime();
-			if (!previous && options.leading === false) previous = now;
-			var remaining = wait - (now - previous);
-			context = this;
-			args = arguments;
-			if (remaining <= 0) {
-				clearTimeout(timeout);
-				timeout = null;
-				previous = now;
-				result = func.apply(context, args);
-				context = args = null;
-			} else if (!timeout && options.trailing !== false) {
-				timeout = setTimeout(later, remaining);
-			}
-			return result;
-		};
-	};
+  /*
+   * Used to slow the ridiculously fast scroll and resize events.
+   *
+   * Returns a function, that, when invoked, will only be triggered at most once
+   * during a given window of time. Normally, the throttled function will run
+   * as much as it can, without ever going more than once per `wait` duration;
+   * but if you'd like to disable the execution on the leading edge, pass
+   * `{leading: false}`. To disable execution on the trailing edge, ditto.
+   * @license https://raw.github.com/jashkenas/underscore/master/LICENSE
+   * @returns {Function}
+   */
+  throttle = function(func, wait, options) {
+    var args, context, later, previous, result, timeout;
+    if (options == null) {
+      options = {};
+    }
+    context = void 0;
+    args = void 0;
+    result = void 0;
+    timeout = null;
+    previous = 0;
+    later = function() {
+      previous = (options.leading === false ? 0 : getTime());
+      timeout = null;
+      result = func.apply(context, args);
+      context = args = null;
+    };
+    return function() {
+      var now, remaining;
+      now = getTime();
+      if (!previous && options.leading === false) {
+        previous = now;
+      }
+      remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0) {
+        clearTimeout(timeout);
+        timeout = null;
+        previous = now;
+        result = func.apply(context, args);
+        context = args = null;
+      } else {
 
-	/**
-	 * Enables ScrollSpy using a selector
-	 * @param {jQuery|string} selector  The elements collection, or a selector
-	 * @param {Object=} options	Optional.
-											throttle : number -> scrollspy throttling. Default: 100 ms
-											offsetTop : number -> offset from top. Default: 0
-											offsetRight : number -> offset from right. Default: 0
-											offsetBottom : number -> offset from bottom. Default: 0
-											offsetLeft : number -> offset from left. Default: 0
-	 * @returns {jQuery}
-	 */
-	$.scrollSpy = function(selector, options) {
-		selector = $(selector);
-		selector.each(function(i, element) {
-			elements.push($(element));
-		});
-		options = options || {
-			throttle: 100
-		};
+      }
+      if (!timeout && options.trailing !== false) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+  };
 
-		offset.top = options.offsetTop || 0;
-		offset.right = options.offsetRight || 0;
-		offset.bottom = options.offsetBottom || 0;
-		offset.left = options.offsetLeft || 0;
+  /*
+   * provides a unique throttled event handler
+   */
+  onSlow = function(jQuery, event, fn, wait) {
+    var handlers, throttleFn;
+    handlers = jQuery.data("scrollSpy:onSlow:" + event);
+    if (handlers) {
+      handlers.push(fn);
+      return this;
+    }
+    handlers = [fn];
+    jQuery.data("scrollSpy:onSlow:" + event, handlers);
+    throttleFn = throttle(function() {
+      return $.each(handlers, function(i, handler) {
+        handler.call();
+        return true;
+      });
+    }, wait);
+    jQuery.on(event, throttleFn);
+  };
 
-		var throttledScroll = throttle(onScroll, options.throttle || 100);
-		var readyScroll = function(){
-			$(document).ready(throttledScroll);
-		};
+  /*
+   * Calculate rectangle coordinates of the viewport
+   */
+  viewPortCoordinates = function() {
+    var coordinates;
+    coordinates = {};
+    coordinates.top = $window.scrollTop();
+    coordinates.left = $window.scrollLeft();
+    coordinates.bottom = coordinates.top + $window.height();
+    coordinates.right = coordinates.left + $window.width();
+    return coordinates;
+  };
 
-		if (!isSpying) {
-			jWindow.on('scroll', readyScroll);
-			jWindow.on('resize', readyScroll);
-			isSpying = true;
-		}
+  /*
+   * Calculate rectangle coordinates of a scrollable parent element
+   */
+  parentCoordinates = function($el) {
+    var coordinates, offsets, padding;
+    offsets = $el.offset();
+    padding = $el.css(['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft']);
+    $.each(padding, function(key, px) {
+      padding[key] = px ? parseFloat(px.slice(0, -2)) : 0;
+      if (isNaN(padding[key])) {
+        return padding[key] = 0;
+      }
+    });
+    coordinates = {};
+    coordinates.top = offsets.top + padding.paddingTop;
+    coordinates.left = offsets.left + padding.paddingLeft;
+    coordinates.right = coordinates.left + $el.width();
+    coordinates.bottom = coordinates.top + $el.height();
+    return coordinates;
+  };
 
-		// perform a scan once, after current execution context, and after dom is ready
-		setTimeout(readyScroll, 0);
+  /*
+   * Calculate rectangle coordinates of an element
+   */
+  childCoordinates = function($el) {
+    var coordinates, offsets;
+    offsets = $el.offset();
+    coordinates = {};
+    coordinates.top = offsets.top;
+    coordinates.left = offsets.left;
+    coordinates.right = coordinates.left + $el.outerWidth();
+    coordinates.bottom = coordinates.top + $el.outerHeight();
+    return coordinates;
+  };
 
-		return selector;
-	};
+  /*
+   * Calculate if two rectangular elements intersect
+   * @param {Object} coordinates of an element
+   * @param {Object} coordinates of an element
+   * @returns {boolean}    True if intersecting / overlapping
+   */
+  checkIntersect = function(a, b) {
+    return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  };
 
-	/**
-	 * Listen for window resize events
-	 * @param {Object=} options						Optional. Set { throttle: number } to change throttling. Default: 100 ms
-	 * @returns {jQuery}		$(window)
-	 */
-	$.winSizeSpy = function(options) {
-		$.winSizeSpy = function() { return jWindow; }; // lock from multiple calls
-		options = options || {
-			throttle: 100
-		};
-		return jWindow.on('resize', throttle(onWinSize, options.throttle || 100));
-	};
+  /*
+   * Binds the spying logic to a contect necessary for element intersection calculations
+   */
+  bindSpy = function(uid, $parent, selector) {
+    return function() {
+      var $children, pCoords;
+      if ($parent === $window) {
+        $children = $(selector);
+        pCoords = viewPortCoordinates();
+      } else {
+        if (typeof selector === 'string') {
+          $children = $parent.find(selector);
+        } else if (selector) {
+          $children = $(selector);
+        }
+        pCoords = parentCoordinates($parent);
+      }
+      $children.each(function(i, child) {
+        var $child, cCoords, hasEntered, isIntersected;
+        $child = $(child);
+        hasEntered = $child.data("scrollSpy:" + uid);
+        cCoords = childCoordinates($child);
+        isIntersected = checkIntersect(pCoords, cCoords);
+        $child.data("scrollSpy:" + uid, isIntersected);
+        if (isIntersected && !hasEntered) {
+          $child.triggerHandler('scrollSpy:enter');
+        } else if (hasEntered && !isIntersected) {
+          $child.triggerHandler('scrollSpy:exit');
+        }
+      });
+      return true;
+    };
+  };
 
-	/**
-	 * Enables ScrollSpy on a collection of elements
-	 * e.g. $('.scrollSpy').scrollSpy()
-	 * @param {Object=} options	Optional.
-											throttle : number -> scrollspy throttling. Default: 100 ms
-											offsetTop : number -> offset from top. Default: 0
-											offsetRight : number -> offset from right. Default: 0
-											offsetBottom : number -> offset from bottom. Default: 0
-											offsetLeft : number -> offset from left. Default: 0
-	 * @returns {jQuery}
-	 */
-	$.fn.scrollSpy = function(options) {
-		return $.scrollSpy($(this), options);
-	};
+  /*
+   * Enables ScrollSpy on elements matching the selector
+   * NOTE: only call after DOM is loaded
+   *
+   * @param {string} selector    A selector statement.
+   * @param {Object=} options    Optional.
+   *             * throttle {number} internal. scroll event throttling. throttling. Default: 100 ms
+   *             * parent {Element|jQuery} a parent scrollable element to track. Default: undefined|null
+   */
+  $.scrollSpy = function(selector, options) {
+    var $parent, $selector, spyFn, uid;
+    if (options == null) {
+      options = {};
+    }
+    options.throttle || (options.throttle = THROTTLE_MS);
+    if (options.parent) {
+      if (options.parent === window) {
+        $parent = $window;
+      } else if (options.parent.length && options.parent[0] === window) {
+        $parent = $window;
+      } else {
+        $parent = $(options.parent).first();
+      }
+    } else {
+      $parent = $window;
+    }
+    if (typeof selector === 'string') {
+      $selector = $parent.find(selector);
+    } else {
+      $selector = $(selector);
+      selector = $selector;
+    }
+    uid = newUid();
+    spyFn = bindSpy(uid, $parent, selector);
+    setTimeout(function() {
+      onSlow($parent, 'scroll', spyFn, options.throttle);
+      onSlow($window, 'resize', spyFn, options.throttle);
+      spyFn();
+    }, 1);
+    return $selector;
+  };
 
+  /*
+   * Enables ScrollSpy on elements in a jQuery collection
+   * e.g. $('.scrollSpy').scrollSpy()
+   * NOTE: only call after DOM is loaded
+   */
+  $.fn.scrollSpy = function(selector, options) {
+    if (options == null) {
+      options = {};
+    }
+    this.each(function(i, parent) {
+      options.parent = parent;
+      return $.scrollSpy(selector, options);
+    });
+    return this;
+  };
+
+  /*
+   * Listen for window throttled resize events
+   * e.g. $.resizeSpy().on('resizeSpy:resize', fn)
+   * NOTE: only call after DOM is loaded
+   */
+  $.resizeSpy = function(options) {
+    $.resizeSpy = function() {
+      return $window;
+    };
+    options.throttle || (options.throttle = THROTTLE_MS);
+    onSlow($window, 'resize', function() {
+      $window.triggerHandler('resizeSpy:resize');
+      return $window.triggerHandler('scrollSpy:resize');
+    }, options.throttle);
+    return $window;
+  };
 })(jQuery);

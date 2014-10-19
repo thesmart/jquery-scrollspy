@@ -16,23 +16,30 @@
   # defaults
   THROTTLE_MS = 200
 
+
   # bound to the window one which the script is linked
   $window = $(window)
 
-  # unique id generator
+
   _uid = 0
+  ###
+  # unique id generator
+  x###
   newUid = ->
     id = "uid-#{_uid}"
     _uid += 1
     return id
 
+  ###
   # Get ms since epoch
   # @license https://raw.github.com/jashkenas/underscore/master/LICENSE
   # @returns {number}
+  ###
   getTime = (Date.now or ->
     new Date().getTime()
   )
 
+  ###
   # Used to slow the ridiculously fast scroll and resize events.
   #
   # Returns a function, that, when invoked, will only be triggered at most once
@@ -42,6 +49,7 @@
   # `{leading: false}`. To disable execution on the trailing edge, ditto.
   # @license https://raw.github.com/jashkenas/underscore/master/LICENSE
   # @returns {Function}
+  ###
   throttle = (func, wait, options = {}) ->
     context = undefined
     args = undefined
@@ -71,7 +79,9 @@
       timeout = setTimeout(later, remaining) if not timeout and options.trailing isnt false
       result
 
+  ###
   # provides a unique throttled event handler
+  ###
   onSlow = (jQuery, event, fn, wait) ->
     # keep a list of all handlers
     handlers = jQuery.data("scrollSpy:onSlow:#{event}")
@@ -91,7 +101,10 @@
     jQuery.on(event, throttleFn)
     return
 
+
+  ###
   # Calculate rectangle coordinates of the viewport
+  ###
   viewPortCoordinates = ->
     coordinates = {}
     coordinates.top = $window.scrollTop()
@@ -100,7 +113,9 @@
     coordinates.right = coordinates.left + $window.width()
     coordinates
 
+  ###
   # Calculate rectangle coordinates of a scrollable parent element
+  ###
   parentCoordinates = ($el) ->
     offsets = $el.offset()
     padding = $el.css(['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'])
@@ -115,7 +130,9 @@
     coordinates.bottom = coordinates.top + $el.height()
     coordinates
 
+  ###
   # Calculate rectangle coordinates of an element
+  ###
   childCoordinates = ($el) ->
     offsets = $el.offset()
     coordinates = {}
@@ -125,14 +142,18 @@
     coordinates.bottom = coordinates.top + $el.outerHeight()
     coordinates
 
+  ###
   # Calculate if two rectangular elements intersect
   # @param {Object} coordinates of an element
   # @param {Object} coordinates of an element
   # @returns {boolean}    True if intersecting / overlapping
+  ###
   checkIntersect = (a, b) ->
     return a.left < b.right and a.right > b.left and a.top < b.bottom and a.bottom > b.top
 
+  ###
   # Binds the spying logic to a contect necessary for element intersection calculations
+  ###
   bindSpy = (uid, $parent, selector) ->
     return ->
       if $parent == $window
@@ -162,6 +183,7 @@
       )
       true
 
+  ###
   # Enables ScrollSpy on elements matching the selector
   # NOTE: only call after DOM is loaded
   #
@@ -169,6 +191,7 @@
   # @param {Object=} options    Optional.
   #             * throttle {number} internal. scroll event throttling. throttling. Default: 100 ms
   #             * parent {Element|jQuery} a parent scrollable element to track. Default: undefined|null
+  ###
   $.scrollSpy = (selector, options = {}) ->
     # defaults
     options.throttle ||= THROTTLE_MS
@@ -206,9 +229,11 @@
     , 1)
     $selector
 
+  ###
   # Enables ScrollSpy on elements in a jQuery collection
   # e.g. $('.scrollSpy').scrollSpy()
   # NOTE: only call after DOM is loaded
+  ###
   $.fn.scrollSpy = (selector, options = {}) ->
     this.each((i, parent) ->
       options.parent = parent
@@ -216,9 +241,11 @@
     )
     this
 
+  ###
   # Listen for window throttled resize events
   # e.g. $.resizeSpy().on('resizeSpy:resize', fn)
   # NOTE: only call after DOM is loaded
+  ###
   $.resizeSpy = (options) ->
     # lock from multiple calls
     $.resizeSpy = ->
