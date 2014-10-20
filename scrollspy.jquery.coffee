@@ -24,7 +24,7 @@
   _uid = 0
   ###
   # unique id generator
-  x###
+  ###
   newUid = ->
     id = "uid-#{_uid}"
     _uid += 1
