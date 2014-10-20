@@ -62,7 +62,6 @@ $ sudo npm install -g harp
 $ harp server .
 # open a new console tab or console window
 $ open 127.0.0.1:9000/demo/
-$ open 127.0.0.1:9000/demo/
 ```
 
 Thank you, contributors!
