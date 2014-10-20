@@ -1,26 +1,33 @@
 #overflow-demo.container
-  .jumbotron
-    h1.text-center jQuery ScrollSpy
-    h1.text-center Overflow Demo
-    .lead
-      p Scroll the divs around to see the squares turn yellow upon entering the viewable region.
-      p Notice that resizing the browser window is also supported.
-      p All spied children in a scrollable div will "exit" when the scrollable div exits the viewport.
-      p The enter and exit events are throttled in order to exaggerate what is happening.
-      pre
-        code.
-          $(window).ready(->
-             $('.box').on('scrollSpy:enter', ->
-               $(this).addClass('entered')
-               $(this).removeClass('exited')
-             )
-             $('.box').on('scrollSpy:exit', ->
-               $(this).removeClass('entered')
-               $(this).addClass('exited')
-             )
-             $('#overflow-1').scrollSpy('.box', throttle: 800)
-             $('#overflow-2').scrollSpy('.box', throttle: 800)
+  h1 jQuery ScrollSpy
+  header
+    ul.nav.nav-tabs.nav-justified(role="tablist")
+      li
+        a(href="./") Home
+      li
+        a(href="./viewport") Viewport Demo
+      li.active
+        a(href="./overflow") Overflow Demo
+  h2 Overflow Demo
+  .lead
+    p Scroll the divs around to see the squares turn yellow upon entering the viewable region.
+    p Notice that resizing the browser window is also supported.
+    p All spied children in a scrollable div will "exit" when the scrollable div exits the viewport.
+    p The enter and exit events are throttled in order to exaggerate what is happening.
+    pre
+      code.
+        $(window).ready(->
+           $('.box').on('scrollSpy:enter', ->
+             $(this).addClass('entered')
+             $(this).removeClass('exited')
            )
+           $('.box').on('scrollSpy:exit', ->
+             $(this).removeClass('entered')
+             $(this).addClass('exited')
+           )
+           $('#overflow-1').scrollSpy('.box', throttle: 800)
+           $('#overflow-2').scrollSpy('.box', throttle: 800)
+         )
   .row
     .col-sm-6
       #overflow-1
