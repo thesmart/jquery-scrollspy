@@ -53,6 +53,8 @@ Feature requests are much less helpful than pull requests.
 
 Test cases would be most welcome!
 
+I could also use help on garbage collection / memory lifecycle.
+
 To develop on jquery-scrollspy locally:
 
 ```
